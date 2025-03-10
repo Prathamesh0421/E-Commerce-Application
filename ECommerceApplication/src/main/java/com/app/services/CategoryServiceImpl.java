@@ -20,14 +20,18 @@ import com.app.payloads.CategoryResponse;
 import com.app.repositories.CategoryRepo;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
 	@Autowired
 	private CategoryRepo categoryRepo;
-	
+
 	@Autowired
 	private ProductService productService;
 
@@ -44,6 +48,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 		savedCategory = categoryRepo.save(category);
 
+		log.info("Category created successfully!");
+
 		return modelMapper.map(savedCategory, CategoryDTO.class);
 	}
 
@@ -53,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
 				: Sort.by(sortBy).descending();
 
 		Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
-		
+
 		Page<Category> pageCategories = categoryRepo.findAll(pageDetails);
 
 		List<Category> categories = pageCategories.getContent();
@@ -66,14 +72,16 @@ public class CategoryServiceImpl implements CategoryService {
 				.map(category -> modelMapper.map(category, CategoryDTO.class)).collect(Collectors.toList());
 
 		CategoryResponse categoryResponse = new CategoryResponse();
-		
+
 		categoryResponse.setContent(categoryDTOs);
 		categoryResponse.setPageNumber(pageCategories.getNumber());
 		categoryResponse.setPageSize(pageCategories.getSize());
 		categoryResponse.setTotalElements(pageCategories.getTotalElements());
 		categoryResponse.setTotalPages(pageCategories.getTotalPages());
 		categoryResponse.setLastPage(pageCategories.isLast());
-		
+
+		log.info("Category retrieved successfully!");
+
 		return categoryResponse;
 	}
 
@@ -86,6 +94,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 		savedCategory = categoryRepo.save(category);
 
+		log.info("Category updated successfully!");
+
 		return modelMapper.map(savedCategory, CategoryDTO.class);
 	}
 
@@ -93,14 +103,16 @@ public class CategoryServiceImpl implements CategoryService {
 	public String deleteCategory(Long categoryId) {
 		Category category = categoryRepo.findById(categoryId)
 				.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
-		
+
 		List<Product> products = category.getProducts();
 
 		products.forEach(product -> {
 			productService.deleteProduct(product.getProductId());
 		});
-		
+
 		categoryRepo.delete(category);
+
+		log.info("Category deleted successfully!");
 
 		return "Category with categoryId: " + categoryId + " deleted successfully !!!";
 	}

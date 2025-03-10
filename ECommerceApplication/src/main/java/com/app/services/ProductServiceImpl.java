@@ -27,10 +27,13 @@ import com.app.repositories.CategoryRepo;
 import com.app.repositories.ProductRepo;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @Service
 public class ProductServiceImpl implements ProductService {
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private ProductRepo productRepo;
@@ -82,6 +85,8 @@ public class ProductServiceImpl implements ProductService {
 
 			Product savedProduct = productRepo.save(product);
 
+			log.info("Product Added Successfully!");
+
 			return modelMapper.map(savedProduct, ProductDTO.class);
 		} else {
 			throw new APIException("Product already exists !!!");
@@ -111,6 +116,8 @@ public class ProductServiceImpl implements ProductService {
 		productResponse.setTotalElements(pageProducts.getTotalElements());
 		productResponse.setTotalPages(pageProducts.getTotalPages());
 		productResponse.setLastPage(pageProducts.isLast());
+
+		log.info("Products retrieved Successfully!");
 
 		return productResponse;
 	}
@@ -147,11 +154,14 @@ public class ProductServiceImpl implements ProductService {
 		productResponse.setTotalPages(pageProducts.getTotalPages());
 		productResponse.setLastPage(pageProducts.isLast());
 
+		log.info("Product retrived Successfully!");
+
 		return productResponse;
 	}
 
 	@Override
-	public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+	public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy,
+			String sortOrder) {
 		Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
 				: Sort.by(sortBy).descending();
 
@@ -160,7 +170,7 @@ public class ProductServiceImpl implements ProductService {
 		Page<Product> pageProducts = productRepo.findByProductNameLike(keyword, pageDetails);
 
 		List<Product> products = pageProducts.getContent();
-		
+
 		if (products.size() == 0) {
 			throw new APIException("Products not found with keyword: " + keyword);
 		}
@@ -176,6 +186,8 @@ public class ProductServiceImpl implements ProductService {
 		productResponse.setTotalElements(pageProducts.getTotalElements());
 		productResponse.setTotalPages(pageProducts.getTotalPages());
 		productResponse.setLastPage(pageProducts.isLast());
+
+		log.info("Product retrieved Successfully!");
 
 		return productResponse;
 	}
@@ -214,6 +226,8 @@ public class ProductServiceImpl implements ProductService {
 
 		cartDTOs.forEach(cart -> cartService.updateProductInCarts(cart.getCartId(), productId));
 
+		log.info("Product updated Successfully!");
+
 		return modelMapper.map(savedProduct, ProductDTO.class);
 	}
 
@@ -225,16 +239,18 @@ public class ProductServiceImpl implements ProductService {
 		if (productFromDB == null) {
 			throw new APIException("Product not found with productId: " + productId);
 		}
-		
+
 		String fileName = fileService.uploadImage(path, image);
-		
+
 		productFromDB.setImage(fileName);
-		
+
 		Product updatedProduct = productRepo.save(productFromDB);
-		
+
+		log.info("Product image updated Successfully!");
+
 		return modelMapper.map(updatedProduct, ProductDTO.class);
 	}
-	
+
 	@Override
 	public String deleteProduct(Long productId) {
 
@@ -246,6 +262,8 @@ public class ProductServiceImpl implements ProductService {
 		carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
 
 		productRepo.delete(product);
+
+		log.info("Product deleted Successfully!");
 
 		return "Product with productId: " + productId + " deleted successfully !!!";
 	}

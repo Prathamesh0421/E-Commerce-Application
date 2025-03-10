@@ -32,10 +32,14 @@ import com.app.repositories.PaymentRepo;
 import com.app.repositories.UserRepo;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @Service
 public class OrderServiceImpl implements OrderService {
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	public UserRepo userRepo;
@@ -124,8 +128,10 @@ public class OrderServiceImpl implements OrderService {
 		});
 
 		OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
-		
+
 		orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
+
+		log.info("Order placed successfully!");
 
 		return orderDTO;
 	}
@@ -141,6 +147,8 @@ public class OrderServiceImpl implements OrderService {
 			throw new APIException("No orders placed yet by the user with email: " + emailId);
 		}
 
+		log.info("Orders retrived successfully!");
+
 		return orderDTOs;
 	}
 
@@ -152,6 +160,8 @@ public class OrderServiceImpl implements OrderService {
 		if (order == null) {
 			throw new ResourceNotFoundException("Order", "orderId", orderId);
 		}
+
+		log.info("Order retrived successfully!");
 
 		return modelMapper.map(order, OrderDTO.class);
 	}
@@ -170,20 +180,22 @@ public class OrderServiceImpl implements OrderService {
 
 		List<OrderDTO> orderDTOs = orders.stream().map(order -> modelMapper.map(order, OrderDTO.class))
 				.collect(Collectors.toList());
-		
+
 		if (orderDTOs.size() == 0) {
 			throw new APIException("No orders placed yet by the users");
 		}
 
 		OrderResponse orderResponse = new OrderResponse();
-		
+
 		orderResponse.setContent(orderDTOs);
 		orderResponse.setPageNumber(pageOrders.getNumber());
 		orderResponse.setPageSize(pageOrders.getSize());
 		orderResponse.setTotalElements(pageOrders.getTotalElements());
 		orderResponse.setTotalPages(pageOrders.getTotalPages());
 		orderResponse.setLastPage(pageOrders.isLast());
-		
+
+		log.info("Orders retrived successfully!");
+
 		return orderResponse;
 	}
 
@@ -197,6 +209,8 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		order.setOrderStatus(orderStatus);
+
+		log.info("Order updated successfully!");
 
 		return modelMapper.map(order, OrderDTO.class);
 	}
