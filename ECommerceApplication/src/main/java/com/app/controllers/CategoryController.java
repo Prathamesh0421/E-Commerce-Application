@@ -18,14 +18,20 @@ import com.app.entites.Category;
 import com.app.payloads.CategoryDTO;
 import com.app.payloads.CategoryResponse;
 import com.app.services.CategoryService;
+import com.app.services.UserService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
 @SecurityRequirement(name = "E-Commerce Application")
 public class CategoryController {
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private CategoryService categoryService;
@@ -33,6 +39,8 @@ public class CategoryController {
 	@PostMapping("/admin/category")
 	public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody Category category) {
 		CategoryDTO savedCategoryDTO = categoryService.createCategory(category);
+
+		log.info("category created successfully!");
 
 		return new ResponseEntity<CategoryDTO>(savedCategoryDTO, HttpStatus.CREATED);
 	}
@@ -43,8 +51,10 @@ public class CategoryController {
 			@RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
 			@RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder) {
-		
+
 		CategoryResponse categoryResponse = categoryService.getCategories(pageNumber, pageSize, sortBy, sortOrder);
+
+		log.info("category retrieved successfully!");
 
 		return new ResponseEntity<CategoryResponse>(categoryResponse, HttpStatus.FOUND);
 	}
@@ -54,12 +64,16 @@ public class CategoryController {
 			@PathVariable Long categoryId) {
 		CategoryDTO categoryDTO = categoryService.updateCategory(category, categoryId);
 
+		log.info("category updated successfully!");
+
 		return new ResponseEntity<CategoryDTO>(categoryDTO, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/admin/categories/{categoryId}")
 	public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
 		String status = categoryService.deleteCategory(categoryId);
+
+		log.info("category deleted successfully!");
 
 		return new ResponseEntity<String>(status, HttpStatus.OK);
 	}

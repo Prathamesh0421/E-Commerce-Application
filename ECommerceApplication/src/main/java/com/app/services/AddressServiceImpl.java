@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 @Transactional
 @Service
 public class AddressServiceImpl implements AddressService {
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private AddressRepo addressRepo;
@@ -53,6 +54,8 @@ public class AddressServiceImpl implements AddressService {
 
 		Address savedAddress = addressRepo.save(address);
 
+		log.info("Address saves successfully!");
+
 		return modelMapper.map(savedAddress, AddressDTO.class);
 	}
 
@@ -63,6 +66,7 @@ public class AddressServiceImpl implements AddressService {
 		List<AddressDTO> addressDTOs = addresses.stream().map(address -> modelMapper.map(address, AddressDTO.class))
 				.collect(Collectors.toList());
 
+		log.info("Addresses retrieved successfully!");
 		return addressDTOs;
 	}
 
@@ -70,6 +74,8 @@ public class AddressServiceImpl implements AddressService {
 	public AddressDTO getAddress(Long addressId) {
 		Address address = addressRepo.findById(addressId)
 				.orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+
+		log.info("Address retrieved successfully!");
 
 		return modelMapper.map(address, AddressDTO.class);
 	}
@@ -93,6 +99,8 @@ public class AddressServiceImpl implements AddressService {
 
 			Address updatedAddress = addressRepo.save(addressFromDB);
 
+			log.info("Address updated successfully!");
+
 			return modelMapper.map(updatedAddress, AddressDTO.class);
 		} else {
 			List<User> users = userRepo.findByAddress(addressId);
@@ -101,6 +109,8 @@ public class AddressServiceImpl implements AddressService {
 			users.forEach(user -> user.getAddresses().add(a));
 
 			deleteAddress(addressId);
+
+			log.info("Address updated successfully!");
 
 			return modelMapper.map(addressFromDB, AddressDTO.class);
 		}
@@ -120,6 +130,8 @@ public class AddressServiceImpl implements AddressService {
 		});
 
 		addressRepo.deleteById(addressId);
+
+		log.info("Address deleted successfully!");
 
 		return "Address deleted succesfully with addressId: " + addressId;
 	}

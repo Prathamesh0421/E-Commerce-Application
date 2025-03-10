@@ -17,51 +17,65 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.entites.Address;
 import com.app.payloads.AddressDTO;
 import com.app.services.AddressService;
+import com.app.services.UserService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/admin")
 @SecurityRequirement(name = "E-Commerce Application")
 public class AddressController {
-	
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
 	@Autowired
 	private AddressService addressService;
-	
+
 	@PostMapping("/address")
 	public ResponseEntity<AddressDTO> createAddress(@Valid @RequestBody AddressDTO addressDTO) {
 		AddressDTO savedAddressDTO = addressService.createAddress(addressDTO);
-		
+
+		log.info("Address saved successfully!");
+
 		return new ResponseEntity<AddressDTO>(savedAddressDTO, HttpStatus.CREATED);
 	}
-	
+
 	@GetMapping("/addresses")
 	public ResponseEntity<List<AddressDTO>> getAddresses() {
 		List<AddressDTO> addressDTOs = addressService.getAddresses();
-		
+
+		log.info("Addresses retrived successfully!");
+
 		return new ResponseEntity<List<AddressDTO>>(addressDTOs, HttpStatus.FOUND);
 	}
-	
+
 	@GetMapping("/addresses/{addressId}")
 	public ResponseEntity<AddressDTO> getAddress(@PathVariable Long addressId) {
 		AddressDTO addressDTO = addressService.getAddress(addressId);
-		
+
+		log.info("Address retrieved successfully!");
+
 		return new ResponseEntity<AddressDTO>(addressDTO, HttpStatus.FOUND);
 	}
-	
+
 	@PutMapping("/addresses/{addressId}")
 	public ResponseEntity<AddressDTO> updateAddress(@PathVariable Long addressId, @RequestBody Address address) {
 		AddressDTO addressDTO = addressService.updateAddress(addressId, address);
-		
+
+		log.info("Address updated successfully!");
+
 		return new ResponseEntity<AddressDTO>(addressDTO, HttpStatus.OK);
 	}
-	
+
 	@DeleteMapping("/addresses/{addressId}")
 	public ResponseEntity<String> deleteAddress(@PathVariable Long addressId) {
 		String status = addressService.deleteAddress(addressId);
-		
+
+		log.info("Address deleted successfully!");
+
 		return new ResponseEntity<String>(status, HttpStatus.OK);
 	}
 }
