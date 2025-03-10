@@ -12,6 +12,8 @@ import com.app.config.UserInfoConfig;
 import com.app.entites.User;
 import com.app.exceptions.ResourceNotFoundException;
 import com.app.repositories.UserRepo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -22,7 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<User> user = userRepo.findByEmail(username);
-		
-		return user.map(UserInfoConfig::new).orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
+
+		return user.map(UserInfoConfig::new)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
 	}
 }

@@ -3,6 +3,7 @@ package com.app.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hibernate.sql.results.LoadingLogger_.logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,14 @@ import com.app.repositories.CartRepo;
 import com.app.repositories.ProductRepo;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @Service
 public class CartServiceImpl implements CartService {
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private CartRepo cartRepo;
@@ -74,6 +79,8 @@ public class CartServiceImpl implements CartService {
 
 		cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
 
+		log.info("Products Added to Cart!");
+
 		CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
 		List<ProductDTO> productDTOs = cart.getCartItems().stream()
@@ -105,6 +112,8 @@ public class CartServiceImpl implements CartService {
 
 		}).collect(Collectors.toList());
 
+		log.info("Carts retrieved Successfully!");
+
 		return cartDTOs;
 	}
 
@@ -117,11 +126,13 @@ public class CartServiceImpl implements CartService {
 		}
 
 		CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
-		
+
 		List<ProductDTO> products = cart.getCartItems().stream()
 				.map(p -> modelMapper.map(p.getProduct(), ProductDTO.class)).collect(Collectors.toList());
 
 		cartDTO.setProducts(products);
+
+		log.info("Cart retrieved Successfully!");
 
 		return cartDTO;
 	}
@@ -147,6 +158,7 @@ public class CartServiceImpl implements CartService {
 		cart.setTotalPrice(cartPrice + (cartItem.getProductPrice() * cartItem.getQuantity()));
 
 		cartItem = cartItemRepo.save(cartItem);
+		log.info("Cart products updated Successfully!");
 	}
 
 	@Override
@@ -190,7 +202,7 @@ public class CartServiceImpl implements CartService {
 				.map(p -> modelMapper.map(p.getProduct(), ProductDTO.class)).collect(Collectors.toList());
 
 		cartDTO.setProducts(productDTOs);
-
+		log.info("Product quantity updated Successfully!");
 		return cartDTO;
 
 	}
@@ -212,6 +224,8 @@ public class CartServiceImpl implements CartService {
 		product.setQuantity(product.getQuantity() + cartItem.getQuantity());
 
 		cartItemRepo.deleteCartItemByProductIdAndCartId(cartId, productId);
+
+		log.info("Product deleted Successfully!");
 
 		return "Product " + cartItem.getProduct().getProductName() + " removed from the cart !!!";
 	}

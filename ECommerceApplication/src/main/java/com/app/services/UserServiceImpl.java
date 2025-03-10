@@ -31,10 +31,14 @@ import com.app.repositories.RoleRepo;
 import com.app.repositories.UserRepo;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @Service
 public class UserServiceImpl implements UserService {
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private UserRepo userRepo;
@@ -86,6 +90,9 @@ public class UserServiceImpl implements UserService {
 
 			User registeredUser = userRepo.save(user);
 
+			log.info(String.format("User - $s %s with email %s and mobile no. - %s is registered successfully!",
+					user.getFirstName(), user.getLastName(), user.getEmail(), user.getMobileNumber()));
+
 			cart.setUser(registeredUser);
 
 			userDTO = modelMapper.map(registeredUser, UserDTO.class);
@@ -105,9 +112,9 @@ public class UserServiceImpl implements UserService {
 				: Sort.by(sortBy).descending();
 
 		Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
-		
+
 		Page<User> pageUsers = userRepo.findAll(pageDetails);
-		
+
 		List<User> users = pageUsers.getContent();
 
 		if (users.size() == 0) {
@@ -135,14 +142,14 @@ public class UserServiceImpl implements UserService {
 		}).collect(Collectors.toList());
 
 		UserResponse userResponse = new UserResponse();
-		
+
 		userResponse.setContent(userDTOs);
 		userResponse.setPageNumber(pageUsers.getNumber());
 		userResponse.setPageSize(pageUsers.getSize());
 		userResponse.setTotalElements(pageUsers.getTotalElements());
 		userResponse.setTotalPages(pageUsers.getTotalPages());
 		userResponse.setLastPage(pageUsers.isLast());
-		
+
 		return userResponse;
 	}
 
@@ -150,7 +157,8 @@ public class UserServiceImpl implements UserService {
 	public UserDTO getUserById(Long userId) {
 		User user = userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
-
+		log.info(String.format("User %s %s %s retrived successfully", user.getFirstName(), user.getLastName(),
+				user.getEmail()));
 		UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
 		userDTO.setAddress(modelMapper.map(user.getAddresses().stream().findFirst().get(), AddressDTO.class));
@@ -200,6 +208,9 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
+		log.info(String.format("User %s %s %s updated successfully", user.getFirstName(), user.getLastName(),
+				user.getEmail()));
+
 		userDTO = modelMapper.map(user, UserDTO.class);
 
 		userDTO.setAddress(modelMapper.map(user.getAddresses().stream().findFirst().get(), AddressDTO.class));
@@ -232,6 +243,9 @@ public class UserServiceImpl implements UserService {
 		});
 
 		userRepo.delete(user);
+
+		log.info(String.format("User %s %s %s deleted successfully", user.getFirstName(), user.getLastName(),
+				user.getEmail()));
 
 		return "User with userId " + userId + " deleted successfully!!!";
 	}
